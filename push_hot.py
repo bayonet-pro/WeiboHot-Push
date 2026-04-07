@@ -2,7 +2,6 @@ import os
 import requests
 
 def get_weibo_hot():
-    # 直接调用微博官方接口，100%稳定，永不失效
     url = "https://weibo.com/ajax/side/hotSearch"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
@@ -12,7 +11,7 @@ def get_weibo_hot():
     hot_list = data["data"]["realtime"]
 
     content = "📌 微博实时热搜\n\n"
-    for i, item in enumerate(hot_list[:20], 1):
+    for i, item in enumerate(hot_list[:15], 1):
         title = item["note"]
         hot = str(item.get("num", ""))
         content += f"{i}. {title} 🔥{hot}\n"
@@ -21,11 +20,15 @@ def get_weibo_hot():
 def send(content):
     key = os.getenv("SERVER_KEY")
     api = f"https://sctapi.ftqq.com/{key}.send"
+    
     data = {
         "title": "微博热搜已更新",
-        "desp": content
+        "desp": content,
+        "channel": "wechat"  # 强制推送到公众号！关键！
     }
-    requests.post(api, data=data)
+    
+    response = requests.post(api, data=data)
+    print("推送状态：", response.json())
 
 if __name__ == "__main__":
     try:
